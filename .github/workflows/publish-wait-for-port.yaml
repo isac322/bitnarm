@@ -8,25 +8,32 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref_name, 'wait-for-port@')
     env:
       DOCKERHUB_USERNAME: isac322
       PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/ppc64le
     steps:
+      - name: Extract repository name
+        id: vars
+        run: |
+          name="$(echo '${{ github.ref_name }}' | cut -f1 -d@)"
+          version="$(echo '${{ github.ref_name }}' | cut -f2 -d@)"
+          echo "name=${name}" >> $GITHUB_OUTPUT
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
       - name: Docker meta
         id: docker_meta
         uses: docker/metadata-action@v4
         with:
           flavor: latest=true
-          images: ${{ env.DOCKERHUB_USERNAME }}/wait-for-port
+          images: ${{ env.DOCKERHUB_USERNAME }}/${{ steps.vars.outputs.name }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=match,pattern=\d+.\d+.\d+
+            type=match,pattern=(\d+).\d+.\d+,group=1
+            type=match,pattern=(\d+.\d+).\d+,group=1
           labels: |
             maintainer=${{ env.DOCKERHUB_USERNAME }}
-            org.opencontainers.image.title=wait-for-port
-            org.opencontainers.image.source=https://github.com/bitnami/wait-for-port
+            org.opencontainers.image.title=${{ steps.vars.outputs.name }}
+            org.opencontainers.image.source=https://github.com/bitnami/${{ steps.vars.outputs.name }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -63,7 +70,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v3
         with:
-          context: "{{defaultContext}}:wait-for-port"
+          context: "{{defaultContext}}:${{ steps.vars.outputs.name }}"
           push: true
           build-args: |
             VERSION=${{ steps.docker_meta.outputs.version }}
