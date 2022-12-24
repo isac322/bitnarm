@@ -21,6 +21,7 @@ jobs:
 
       - name: Get version
         id: version
+        working-directory: wait-for-port
         run: |
           GH_TAG="$(go list -f '{{ .Version }}' -m 'github.com/bitnami/wait-for-port')"
           echo "version=${GH_TAG}" >> $GITHUB_OUTPUT
@@ -55,6 +56,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v3
         with:
+          context: "{{defaultContext}}:wait-for-port"
           push: false
           build-args: |
             VERSION=${{ steps.version.outputs.version }}
