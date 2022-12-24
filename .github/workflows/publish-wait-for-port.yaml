@@ -73,7 +73,7 @@ jobs:
           context: "{{defaultContext}}:${{ steps.vars.outputs.name }}"
           push: true
           build-args: |
-            VERSION=${{ steps.docker_meta.outputs.version }}
+            VERSION=v${{ steps.docker_meta.outputs.version }}
           platforms: ${{ env.PLATFORMS }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
