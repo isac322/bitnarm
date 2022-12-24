@@ -26,4 +26,4 @@ jobs:
         with:
           repo_token: "${{ secrets.GHA_PAT }}"
           prerelease: false
-          automatic_release_tag: ${{ steps.version.outputs.version }}
+          automatic_release_tag: wait-for-port@${{ steps.version.outputs.version }}

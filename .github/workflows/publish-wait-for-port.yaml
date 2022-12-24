@@ -1,10 +1,6 @@
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - wait-for-port/**
-      - .github/workflows/ci-wait-for-port.yaml
+  release:
+    types: [released]
 
   workflow_dispatch:
 
@@ -12,7 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref_name, 'wait-for-port@')
     env:
+      DOCKERHUB_USERNAME: isac322
       PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/ppc64le
     steps:
       - name: Docker meta
