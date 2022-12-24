@@ -4,9 +4,11 @@ on:
       - master
     paths:
       - wait-for-port/**
+      - .github/workflows/ci-wait-for-port.yaml
   pull_request:
     paths:
       - wait-for-port/**
+      - .github/workflows/ci-wait-for-port.yaml
 
   workflow_dispatch:
 
