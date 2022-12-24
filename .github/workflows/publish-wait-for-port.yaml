@@ -5,10 +5,6 @@ on:
     paths:
       - wait-for-port/**
       - .github/workflows/ci-wait-for-port.yaml
-  pull_request:
-    paths:
-      - wait-for-port/**
-      - .github/workflows/ci-wait-for-port.yaml
 
   workflow_dispatch:
 
@@ -19,14 +15,20 @@ jobs:
     env:
       PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/ppc64le
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Get version
-        id: version
-        working-directory: wait-for-port
-        run: |
-          GH_TAG="$(go list -f '{{ .Version }}' -m 'github.com/bitnami/wait-for-port')"
-          echo "version=${GH_TAG}" >> $GITHUB_OUTPUT
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v4
+        with:
+          flavor: latest=true
+          images: ${{ env.DOCKERHUB_USERNAME }}/wait-for-port
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+          labels: |
+            maintainer=${{ env.DOCKERHUB_USERNAME }}
+            org.opencontainers.image.title=wait-for-port
+            org.opencontainers.image.source=https://github.com/bitnami/wait-for-port
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -37,14 +39,19 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v2
         with:
-          install: true
           platforms: ${{ env.PLATFORMS }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Enable buildkit cache
         uses: actions/cache@v3
         with:
           path: /tmp/buildkit-cache/buildkit-state.tar
-          key: ${{ runner.os }}-buildkit-${{ steps.version.outputs.version }}
+          key: ${{ runner.os }}-buildkit-${{ steps.docker_meta.outputs.version }}
           restore-keys: |
             ${{ runner.os }}-buildkit-
 
@@ -59,9 +66,11 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:wait-for-port"
-          push: false
+          push: true
           build-args: |
-            VERSION=${{ steps.version.outputs.version }}
+            VERSION=${{ steps.docker_meta.outputs.version }}
           platforms: ${{ env.PLATFORMS }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=min

@@ -1,0 +1,29 @@
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - wait-for-port/**
+      - .github/workflows/ci-wait-for-port.yaml
+
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get version
+        id: version
+        working-directory: wait-for-port
+        run: |
+          GH_TAG="$(go list -f '{{ .Version }}' -m 'github.com/bitnami/wait-for-port')"
+          echo "version=${GH_TAG}" >> $GITHUB_OUTPUT
+
+      - uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+          repo_token: "${{ secrets.GHA_PAT }}"
+          prerelease: false
+          automatic_release_tag: ${{ steps.version.outputs.version }}
