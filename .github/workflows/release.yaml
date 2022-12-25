@@ -12,14 +12,24 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            wait-for-port/**
+            .github/workflows/release.yaml
+
       - name: Get version
         id: version
+        if: steps.changed-files.outputs.any_changed == 'true'
         working-directory: wait-for-port
         run: |
           GH_TAG="$(go list -f '{{ .Version }}' -m 'github.com/bitnami/wait-for-port')"
           echo "version=${GH_TAG}" >> $GITHUB_OUTPUT
 
       - uses: marvinpinto/action-automatic-releases@v1.2.1
+        if: steps.changed-files.outputs.any_changed == 'true'
         with:
           repo_token: "${{ secrets.GHA_PAT }}"
           prerelease: false
@@ -31,7 +41,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            redis/**
+            .github/workflows/release.yaml
+
       - name: Get version
+        if: steps.changed-files.outputs.any_changed == 'true'
         id: version
         working-directory: redis
         run: |
@@ -39,6 +58,7 @@ jobs:
           echo "version=${DOCKER_TAG}" >> $GITHUB_OUTPUT
 
       - uses: marvinpinto/action-automatic-releases@v1.2.1
+        if: steps.changed-files.outputs.any_changed == 'true'
         with:
           repo_token: "${{ secrets.GHA_PAT }}"
           prerelease: false
