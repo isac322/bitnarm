@@ -30,6 +30,7 @@ jobs:
             type=match,pattern=\d+.\d+.\d+
             type=match,pattern=(\d+).\d+.\d+,group=1
             type=match,pattern=(\d+.\d+).\d+,group=1
+            type=raw,value=${{ steps.vars.outputs.version }}
           labels: |
             maintainer=${{ env.DOCKERHUB_USERNAME }}
             org.opencontainers.image.title=${{ steps.vars.outputs.name }}
