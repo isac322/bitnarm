@@ -2,7 +2,7 @@
 
 FROM --platform=amd64 bitnami/redis:7.0.8-debian-11-r2 as origin
 
-FROM isac322/wait-for-port:1.0.5 as wait-for-port
+FROM isac322/wait-for-port:1.0.6 as wait-for-port
 
 FROM redis:7.0.8
 
