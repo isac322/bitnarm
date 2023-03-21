@@ -4,7 +4,7 @@ FROM --platform=amd64 bitnami/redis:7.0.9-debian-11-r2 as origin
 
 FROM isac322/wait-for-port:1.0.6 as wait-for-port
 
-FROM redis:7.0.8
+FROM redis:7.0.10
 
 COPY --link --from=wait-for-port /usr/local/bin/wait-for-port /usr/local/bin/wait-for-port
 RUN --mount=type=bind,from=origin,target=/tmp/opt,source=/opt \
