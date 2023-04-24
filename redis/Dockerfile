@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM --platform=amd64 bitnami/redis:7.0.10-debian-11-r2 as origin
+FROM --platform=amd64 bitnami/redis:7.0.11-debian-11-r2 as origin
 
 FROM isac322/wait-for-port:1.0.6 as wait-for-port
 
